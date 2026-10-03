@@ -1,37 +1,22 @@
 const express = require("express");
-const bodyParser = require("body-parser");
+const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 
 const app = express();
-app.use(bodyParser.json());
 
-// Enable CORS for all incoming client requests
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, ngrok-skip-browser-warning");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
+// Middlewares
+app.use(cors());
+app.use(express.json());
 
 let telemetryHistory = [];
 
-// Serve frontend production build statically
-const clientDistPath = path.join(__dirname, "../client/dist");
-app.use(express.static(clientDistPath));
-
-// GET / - Serves full website to browsers, or returns backend message for API clients
+// Root Route
 app.get("/", (req, res) => {
-  const acceptHeader = req.headers.accept || "";
-  if (acceptHeader.includes("text/html")) {
-    return res.sendFile(path.join(clientDistPath, "index.html"));
-  }
   res.send("🚀 Astra Backend Running Successfully");
 });
 
-// GET /api - Dedicated API health endpoint
+// Dedicated API health endpoint
 app.get("/api", (req, res) => {
   res.send("🚀 Astra Backend Running Successfully");
 });
@@ -131,12 +116,18 @@ app.get("/report", (req, res) => {
   });
 });
 
-// Single Page Application (SPA) catch-all for React Router navigation (e.g., /dashboard)
-app.use((req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
-});
+// Serve frontend production build statically if available
+const clientDistPath = path.join(__dirname, "../client/dist");
+if (fs.existsSync(path.join(clientDistPath, "index.html"))) {
+  app.use(express.static(clientDistPath));
+  // Single Page Application (SPA) catch-all for React Router navigation
+  app.use((req, res) => {
+    res.sendFile(path.join(clientDistPath, "index.html"));
+  });
+}
 
-const PORT = 5000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Astra Fullstack (Frontend + Backend) running on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
