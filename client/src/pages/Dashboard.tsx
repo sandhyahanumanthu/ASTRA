@@ -19,8 +19,7 @@ import {
   WifiOff,
   Sparkles,
 } from "lucide-react";
-import axios from "axios";
-import { API_URL } from "../api";
+import { API, API_URL } from "../api";
 import { TelemetryCharts } from "../components/TelemetryCharts";
 
 export interface TelemetryResponse {
@@ -85,8 +84,9 @@ export const Dashboard: React.FC = () => {
   // Ping backend server to verify connection
   const checkServerStatus = async () => {
     try {
+      console.log("[Astra] API URL:", API_URL);
       const startTime = performance.now();
-      await axios.get(`${API_URL}/`);
+      await API.get("/");
       const responseTime = Math.round(performance.now() - startTime);
       setLatency(responseTime);
       setApiOnline(true);
@@ -99,7 +99,8 @@ export const Dashboard: React.FC = () => {
   // Fetch latest telemetry history from MongoDB
   const fetchTelemetryHistory = async () => {
     try {
-      const res = await axios.get(`${API_URL}/telemetry`);
+      const res = await API.get("/telemetry");
+      console.log("[Telemetry GET] Response:", res.data);
       if (Array.isArray(res.data) && res.data.length > 0) {
         const mapped: TelemetryResponse[] = res.data.map((item: any) => ({
           status: item.status === "ANOMALY" ? "ANOMALY" : "NORMAL",
@@ -121,7 +122,7 @@ export const Dashboard: React.FC = () => {
         }
       }
     } catch (err) {
-      console.warn("Could not load initial history from /telemetry", err);
+      console.warn("[Telemetry GET] Could not load history:", err);
     }
   };
 
@@ -154,11 +155,17 @@ export const Dashboard: React.FC = () => {
 
     const startTime = performance.now();
 
+    // Debug: confirm URL before every request
+    console.log("[Astra] API URL:", API_URL);
+    console.log("[Telemetry POST] Payload:", payload);
+
     try {
-      const res = await axios.post(`${API_URL}/telemetry`, payload);
+      const res = await API.post("/telemetry", payload);
       const resTime = Math.round(performance.now() - startTime);
       setLatency(resTime);
       setApiOnline(true);
+
+      console.log("[Telemetry POST] SUCCESS:", res.data);
 
       const resData = res.data;
       const formattedResult: TelemetryResponse = {
@@ -188,18 +195,27 @@ export const Dashboard: React.FC = () => {
         setNormalCount((c) => c + 1);
       }
     } catch (err: any) {
-      console.error("[Telemetry API Error]", err);
+      console.error("[Telemetry POST] FULL ERROR:", err);
+      console.error("[Telemetry POST] Status:", err?.response?.status);
+      console.error("[Telemetry POST] Response data:", err?.response?.data);
+      console.error("[Telemetry POST] Error code:", err?.code);
       setApiOnline(false);
 
       const isNetworkError =
         !err.response ||
         err.code === "ERR_NETWORK" ||
+        err.code === "ECONNABORTED" ||
         err.message === "Network Error";
+
       const serverMsg = isNetworkError
-        ? "Network Error: Could not connect to deployed backend."
+        ? err.code === "ECONNABORTED"
+          ? "Timeout: Backend is waking up (Render cold start). Please wait 30s and retry."
+          : "Network Error: Could not reach deployed backend. Check your internet or backend status."
         : err?.response?.data?.message ||
+          err?.response?.data?.error ||
           err?.message ||
-          "Network Error: Failed to reach telemetry backend.";
+          "Request failed. Check DevTools → Network for details.";
+
       setErrorMessage(serverMsg);
     } finally {
       setLoading(false);

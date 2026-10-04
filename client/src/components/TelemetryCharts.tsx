@@ -64,7 +64,7 @@ export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ history }) => 
       <div className="flex items-center justify-between mb-4 px-1">
         <div className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-teal-400" />
-          <span>Real-time Telemetry Telemetry Trends</span>
+          <span>Real-time Telemetry Trends</span>
         </div>
         <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -96,7 +96,7 @@ export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ history }) => 
 
           {chartData.length === 0 ? (
             <div className="h-56 flex items-center justify-center text-xs font-mono text-slate-500">
-              Awaiting telemetry telemetry broadcast...
+              Awaiting telemetry broadcast...
             </div>
           ) : (
             <div className="h-60 w-full">
@@ -190,7 +190,7 @@ export const TelemetryCharts: React.FC<TelemetryChartsProps> = ({ history }) => 
 
           {chartData.length === 0 ? (
             <div className="h-56 flex items-center justify-center text-xs font-mono text-slate-500">
-              Awaiting telemetry telemetry broadcast...
+              Awaiting telemetry broadcast...
             </div>
           ) : (
             <div className="h-60 w-full">

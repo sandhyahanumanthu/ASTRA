@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import gsap from "gsap";
 import { ArrowRight, Sparkles, Globe } from "lucide-react";
 import { RocketCanvas } from "../components/RocketCanvas";
-import axios from "axios";
-import { API_URL } from "../api";
+import { API } from "../api";
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +16,7 @@ export const LandingPage: React.FC = () => {
     let isMounted = true;
     const checkServer = async () => {
       try {
-        await axios.get(`${API_URL}/`);
+        await API.get("/");
         if (isMounted) setApiOnline(true);
       } catch {
         if (isMounted) setApiOnline(false);
@@ -69,7 +68,7 @@ export const LandingPage: React.FC = () => {
 
         <div className="flex items-center gap-3 pointer-events-auto">
           <div
-            title={`Backend: ${API_URL}`}
+            title={`Backend: ${import.meta.env.VITE_API_URL || "https://astra-backend-87xd.onrender.com"}`}
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono tracking-wider bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl text-slate-400"
           >
             <Globe
