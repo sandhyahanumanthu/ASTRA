@@ -10,7 +10,7 @@ const app = express();
 app.use(
   cors({
     origin: "*",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "OPTIONS"],
   })
 );
 
@@ -37,8 +37,9 @@ app.get("/health", (req, res) => {
   });
 });
 
-// 5. Telemetry Routes
+// 5. Telemetry Routes (mounted on both /telemetry and root for flexibility)
 app.use("/telemetry", telemetryRoutes);
+app.use("/", telemetryRoutes);
 
 // 6. Port Configuration
 const PORT = process.env.PORT || 5000;

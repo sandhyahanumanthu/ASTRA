@@ -1,4 +1,12 @@
 import axios from "axios";
+import type {
+  TelemetryRecord,
+  HealthResponse,
+  InvestigationCase,
+  SimulationResult,
+  TelemetrySummary,
+  HumanFeedback,
+} from "./types/telemetry";
 
 // Deployed Render backend base URL
 // Loaded from .env (VITE_API_URL) at build time by Vite
@@ -36,6 +44,53 @@ API.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Typed API Helper Functions
+
+export async function checkHealth(): Promise<HealthResponse> {
+  const res = await API.get<HealthResponse>("/health");
+  return res.data;
+}
+
+export async function getTelemetry(limit = 20, status?: string): Promise<TelemetryRecord[]> {
+  const params: Record<string, any> = { limit };
+  if (status) params.status = status;
+  const res = await API.get<TelemetryRecord[]>("/telemetry", { params });
+  return res.data;
+}
+
+export async function postTelemetry(payload: {
+  temperature: number;
+  pressure: number;
+  vibration: number;
+}): Promise<TelemetryRecord> {
+  const res = await API.post<TelemetryRecord>("/telemetry", payload);
+  return res.data;
+}
+
+export async function runSimulation(payload: {
+  temperature: number;
+  pressure: number;
+  vibration: number;
+}): Promise<SimulationResult> {
+  const res = await API.post<SimulationResult>("/telemetry/simulate", payload);
+  return res.data;
+}
+
+export async function getInvestigations(): Promise<InvestigationCase[]> {
+  const res = await API.get<InvestigationCase[]>("/telemetry/investigations");
+  return res.data;
+}
+
+export async function submitHumanFeedback(feedback: HumanFeedback): Promise<{ success: boolean; message: string }> {
+  const res = await API.post<{ success: boolean; message: string }>("/telemetry/feedback", feedback);
+  return res.data;
+}
+
+export async function getTelemetrySummary(): Promise<TelemetrySummary> {
+  const res = await API.get<TelemetrySummary>("/telemetry/summary");
+  return res.data;
+}
 
 export const API_BASE_URL = API_URL;
 export const apiClient = API;

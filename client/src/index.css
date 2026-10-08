@@ -103,3 +103,20 @@
 .font-mono-num {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
 }
+
+/* Print Styles for Investigation Dossier Export */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  .print\:hidden {
+    display: none !important;
+  }
+  .glass-surface {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+  }
+}
